@@ -1,9 +1,10 @@
-# lasso-s3-writer
+# lasso-gcs-writer
 
 A plugin for [`lasso`](https://github.com/lasso-js/lasso) that will
-upload bundles and resources to Amazon S3.
+upload bundles and resources to Google Cloud Storage.
 
-> WARNING: `lasso-s3-writer` should only be used to do Lasso prebuilds
+> WARNING: `lasso-gcs-writer` should only be used to do Lasso prebuilds
+> WARNING: `lasso-gcs-writer` is currently completely untested
 
 ## Usage
 
@@ -11,12 +12,10 @@ upload bundles and resources to Amazon S3.
 require('lasso').configure({
   plugins: [
     {
-      plugin: 'lasso-s3-writer',
+      plugin: 'lasso-gcs-writer',
       config: {
-        awsConfig: {
-          region: 'us-east-1'
-        },
-        bucket: 'my-awesome-s3-bucket'
+        bucket: 'my-awesome-s3-bucket/folderToWriteTo',
+        staticUrl: 'https://www.iHaveAStaticUrlOnMyBucket.com/folderToWriteTo'
       }
     }
   ],
@@ -26,10 +25,9 @@ require('lasso').configure({
 
 ## Configuration Properties
 
-- `bucket` {String|Object} - Name of the AWS S3 bucket to upload to or a configuration object that is passed to `s3.createBucket(...)`
-- `awsConfig` {Object} (optional)- Configuration properties that is passed to `AWS.config.update(...)`
-- `s3Config` {Object} (optional) - Configuration properties that is passed to `AWS.S3(...)`
-- `s3` {AWS.S3} (optional) - An `AWS.S3` object
+- `bucket` {String|Object} - Name of the GCS bucket to upload to
+- `projectID` {Object} (optional)- name of the GCS Project ID, needed if creating a new bucket
+- `staticUrl` {Object} (optional) - if you have a static url on your bucket, provide it here (with http:// | https://). Include any folders at end of url
 - `calculateKey` {Function} (optional) - A function to calculate a unique key
 for each bundle or resource. Defaults to using `sha1` checksum.
 - `readTimeout` {Number} (optional) - The maximum amount of time to wait for a
