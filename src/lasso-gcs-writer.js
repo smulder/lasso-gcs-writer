@@ -1,10 +1,10 @@
 //const AWS = require('aws-sdk')
 const mime = require('mime')
 const conflogger = require('conflogger')
-const readResource = require('./util/readResource')
-const readBundle = require('./util/readBundle')
+//const readResource = require('./util/readResource')
+//const readBundle = require('./util/readBundle')
 const calculateChecksum = require('./util/calculateChecksum')
-const getS3UrlIfExists = require('./util/getS3UrlIfExists')
+//const getS3UrlIfExists = require('./util/getS3UrlIfExists')
 const gcsWriteFile = require('./util/gcsWriteFile')
 const createBucketIfNotExist = require('./util/createBucketIfNotExist')
 
