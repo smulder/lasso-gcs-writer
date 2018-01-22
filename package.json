@@ -1,5 +1,5 @@
 {
-  "name": "lasso-s3-writer",
+  "name": "lasso-gcs-writer",
   "version": "0.1.1",
   "description": "Lasso.js plugin for writing files to AWS S3",
   "main": "index.js",
@@ -9,22 +9,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lasso-js/lasso-s3-writer.git"
+    "url": "git+https://github.com/smulder/lasso-gcs-writer.git"
   },
   "keywords": [
     "lasso",
-    "s3",
-    "aws",
+    "gcs",
+    "google cloud storage",
     "plugin"
   ],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lasso-js/lasso-s3-writer/issues"
+    "url": "https://github.com/smulder/lasso-gcs-writer/issues"
   },
-  "homepage": "https://github.com/lasso-js/lasso-s3-writer#readme",
+  "homepage": "https://github.com/smulder/lasso-gcs-writer#readme",
   "dependencies": {
-    "aws-sdk": "^2.135.0",
+    "@google-cloud/storage": "^1.5.2",
     "conflogger": "^1.0.4",
     "mime": "^2.0.3"
   },
