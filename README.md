@@ -4,6 +4,7 @@ A plugin for [`lasso`](https://github.com/lasso-js/lasso) that will
 upload bundles and resources to Google Cloud Storage.
 
 > WARNING: `lasso-gcs-writer` should only be used to do Lasso prebuilds
+
 > WARNING: `lasso-gcs-writer` is currently completely untested
 
 ## Usage
