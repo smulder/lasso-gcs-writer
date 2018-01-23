@@ -31,10 +31,9 @@ async function getKey({reader, calculateKey}){
 }
 */
 
-async function uploadFile ({ staticUrl, bucket, reader, file, contentType, calculateKey, bucketDir }) {
-  let temp;
-  let chunks = await readResource({reader});
-  let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
+async function uploadFile ({ staticUrl, bucket, reader, contentType, bucketDir, key }) {
+  //let temp;
+
   //let key = await getKey({reader, calculateKey});
 
   const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, bucketDir: bucketDir };
@@ -108,8 +107,10 @@ module.exports = function (pluginConfig) {
       try {
         const bundle = lassoContext.bundle;
         const contentType = mime.getType(bundle.contentType);
+	   let chunks = await readBundle(reader, bundle);
+	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
         //const file = await readBundle(reader, bundle.name, readTimeout)
-	   const url = await uploadFile({ bucket, reader, contentType, calculateKey, staticUrl, bucketDir });
+	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key });
         //const url = await uploadFile({ bucket, file, contentType, calculateKey })
         bundle.url = url
         if (callback) return callback()
@@ -126,8 +127,10 @@ module.exports = function (pluginConfig) {
       try {
         const path = lassoContext.path
         const contentType = mime.getType(path)
+	   let chunks = await readResource(reader);
+	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
         //const file = await readResource(reader, path, readTimeout)
-        const url = await uploadFile({ bucket, reader, contentType, calculateKey, staticUrl, bucketDir })
+        const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key });
         if (callback) return callback(null, { url })
         return { url }
       } catch (err) {
