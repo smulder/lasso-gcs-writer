@@ -5,7 +5,7 @@ upload bundles and resources to Google Cloud Storage.
 
 > WARNING: `lasso-gcs-writer` should only be used to do Lasso prebuilds
 
-> WARNING: `lasso-gcs-writer` is currently completely untested
+> WARNING: `lasso-gcs-writer` is not fully tested
 
 ## Usage
 
