@@ -1,8 +1,8 @@
-module.exports = (bucket, key, staticUrl) => {
+module.exports = (bucket, key, staticUrl, locBucketDir) => {
 	if(staticUrl){
-		return `${staticUrl}/${key}`
+		return `${staticUrl}/${locBucketDir}${key}`
 	}else{
 		// Replace with default GCS bucket link url
-		return `https://storage.googleapis.com/${bucket}/${key}`
+		return `https://storage.googleapis.com/${bucket}/${locBucketDir}${key}`
 	}
 }

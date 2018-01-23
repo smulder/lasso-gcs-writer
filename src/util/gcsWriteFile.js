@@ -25,7 +25,7 @@ module.exports = function gcsWriteFile (params) {
 		).on('error', (err) => {
 			reject(err);
 		}).on('finish', () => {
-			resolve(generateGCSUrl(Bucket, Key, staticUrl));
+			resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir));
 		});
 	})
 }
