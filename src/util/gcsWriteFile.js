@@ -3,24 +3,28 @@ const Storage = require('@google-cloud/storage');
 const storage = new Storage();
 
 module.exports = function gcsWriteFile (params) {
-	const { Bucket, Key, ContentType, reader, staticUrl } = params;
+	const { Bucket, Key, contentType, reader, staticUrl, bucketDir } = params;
 
 	return new Promise((resolve, reject) => {
+
+		let locBucketDir = ''
+		if(bucketDir){
+			locBucketDir = bucketDir + '/'
+		}
 
 		let locResult = reader.readBundle().pipe(
 			storage
 			.bucket(Bucket)
-			.file(Key)
+			.file(locBucketDir + Key)
 			.createWriteStream({
 				gzip: true,
 				metadata: {
-					contentType: ContentType
+					contentType: contentType
 				}
 			})
 		).on('error', (err) => {
 			reject(err);
 		}).on('finish', () => {
-			console.log('locResult', locResult);
 			resolve(generateGCSUrl(Bucket, Key, staticUrl));
 		});
 	})

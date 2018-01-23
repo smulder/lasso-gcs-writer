@@ -9,19 +9,46 @@ const gcsWriteFile = require('./util/gcsWriteFile')
 const createBucketIfNotExist = require('./util/createBucketIfNotExist')
 
 
+function getKey({reader, calculateKey}){
+	return new Promise((resolve, reject) => {
+		//TODO integrate existing readFileStream.js
+		const chunks = [];
+	    reader.readBundle().on("data", function (chunk) {
+	       chunks.push(chunk.toString());
+	     }).on('error', (err) => {
+			reject(err);
+		}).on("end", function () {
+	       temp = chunks.join('');
+	       //console.log('temp',temp);
+		  let key = (calculateKey && calculateKey(temp)) || calculateChecksum(temp);
+		  resolve(key);
+	     });
+	});
 
-async function uploadFile ({ staticUrl, bucket, reader, file, contentType, calculateKey }) {
-  const key = (calculateKey && calculateKey(file)) || calculateChecksum(file)
-  const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl }
+}
+
+async function uploadFile ({ staticUrl, bucket, reader, file, contentType, calculateKey, bucketDir }) {
+  let temp;
+
+  let key = await getKey({reader, calculateKey});
+
+  const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, bucketDir: bucketDir };
 
   // Check whether the file already exists in S3
   //let url = await getS3UrlIfExists(s3, params)
   // TODO write GCS check if url exists method
 
+  let url;
+
   if (!url) {
-    url = await gcsWriteFile({
-      ...params
-    })
+    try{
+	    url = await gcsWriteFile({
+	      ...params
+	 });
+    }catch(e){
+	    console.log('error trying to write gcsFile to bucket:', e);
+    }
+
   }
 
   return url
@@ -39,12 +66,14 @@ async function uploadFile ({ staticUrl, bucket, reader, file, contentType, calcu
 module.exports = function (pluginConfig) {
   let {
     projectID,
+    config,
     bucket,
+    bucketDir,
     staticUrl,
     calculateKey,
     readTimeout,
     logger
-  } = pluginConfig || {}
+} = pluginConfig || {}
 
   if (!bucket) throw new Error('"bucket" is a required property of "lasso-gcs-writer"')
 
@@ -71,10 +100,10 @@ module.exports = function (pluginConfig) {
      */
     async writeBundle (reader, lassoContext, callback) {
       try {
-        const bundle = lassoContext.bundle
-        const contentType = mime.getType(bundle.contentType)
+        const bundle = lassoContext.bundle;
+        const contentType = mime.getType(bundle.contentType);
         //const file = await readBundle(reader, bundle.name, readTimeout)
-	   const url = await uploadFile({ bucket, reader, contentType, calculateKey, staticUrl });
+	   const url = await uploadFile({ bucket, reader, contentType, calculateKey, staticUrl, bucketDir });
         //const url = await uploadFile({ bucket, file, contentType, calculateKey })
         bundle.url = url
         if (callback) return callback()
@@ -92,7 +121,7 @@ module.exports = function (pluginConfig) {
         const path = lassoContext.path
         const contentType = mime.getType(path)
         //const file = await readResource(reader, path, readTimeout)
-        const url = await uploadFile({ bucket, reader, contentType, calculateKey, staticUrl })
+        const url = await uploadFile({ bucket, reader, contentType, calculateKey, staticUrl, bucketDir })
         if (callback) return callback(null, { url })
         return { url }
       } catch (err) {
