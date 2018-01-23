@@ -1,15 +1,18 @@
 //const AWS = require('aws-sdk')
 const mime = require('mime')
 const conflogger = require('conflogger')
-//const readResource = require('./util/readResource')
-//const readBundle = require('./util/readBundle')
+const readResource = require('./util/readResource')
+const readBundle = require('./util/readBundle')
 const calculateChecksum = require('./util/calculateChecksum')
 //const getS3UrlIfExists = require('./util/getS3UrlIfExists')
 const gcsWriteFile = require('./util/gcsWriteFile')
 const createBucketIfNotExist = require('./util/createBucketIfNotExist')
 
+	/*
+async function getKey({reader, calculateKey}){
+	//let chunks = await readResource({reader});
+	//return (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
 
-function getKey({reader, calculateKey}){
 	return new Promise((resolve, reject) => {
 		//TODO integrate existing readFileStream.js
 		const chunks = [];
@@ -26,11 +29,13 @@ function getKey({reader, calculateKey}){
 	});
 
 }
+*/
 
 async function uploadFile ({ staticUrl, bucket, reader, file, contentType, calculateKey, bucketDir }) {
   let temp;
-
-  let key = await getKey({reader, calculateKey});
+  let chunks = await readResource({reader});
+  let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
+  //let key = await getKey({reader, calculateKey});
 
   const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, bucketDir: bucketDir };
 
