@@ -58,6 +58,7 @@ async function uploadFile ({ staticUrl, bucket, reader, file, contentType, calcu
 * @param pluginConfig {Object}
 *  pluginConfig.bucket {String} - Name of the GCS bucket to upload to
 *  pluginConfig.projectID {String} (optional) - name of the GCS Project ID, needed if creating a new bucket
+*  pluginConfig.bucketDir {String} (optional) - subdirectory path to wright to on bucket.
 *  pluginConfig.staticUrl {String} (optional) - if you have a static url on your bucket, provide it here (with http:// | https://). Include any folders at end of url
 *  pluginConfig.calculateKey {Function} (optional) - A function to calculate a unique key for each bundle or resource. Defaults to using `sha1` checksum.
 *  pluginConfig.readTimeout {Number} (optional) - The maximum amount of time to wait for a file to be read. Defaults to 30 seconds.
