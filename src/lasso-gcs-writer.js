@@ -1,4 +1,3 @@
-//const AWS = require('aws-sdk')
 const mime = require('mime')
 const conflogger = require('conflogger')
 const readResource = require('./util/readResource')
@@ -8,33 +7,8 @@ const calculateChecksum = require('./util/calculateChecksum')
 const gcsWriteFile = require('./util/gcsWriteFile')
 const createBucketIfNotExist = require('./util/createBucketIfNotExist')
 
-	/*
-async function getKey({reader, calculateKey}){
-	//let chunks = await readResource({reader});
-	//return (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
-
-	return new Promise((resolve, reject) => {
-		//TODO integrate existing readFileStream.js
-		const chunks = [];
-	    reader.readBundle().on("data", function (chunk) {
-	       chunks.push(chunk.toString());
-	     }).on('error', (err) => {
-			reject(err);
-		}).on("end", function () {
-	       temp = chunks.join('');
-	       //console.log('temp',temp);
-		  let key = (calculateKey && calculateKey(temp)) || calculateChecksum(temp);
-		  resolve(key);
-	     });
-	});
-
-}
-*/
 
 async function uploadFile ({ staticUrl, bucket, reader, contentType, bucketDir, key }) {
-  //let temp;
-
-  //let key = await getKey({reader, calculateKey});
 
   const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, bucketDir: bucketDir };
 
@@ -78,19 +52,19 @@ module.exports = function (pluginConfig) {
     calculateKey,
     readTimeout,
     logger
-} = pluginConfig || {}
+} = pluginConfig || {};
 
   if (!bucket) throw new Error('"bucket" is a required property of "lasso-gcs-writer"')
 
-  logger = conflogger.configure(logger)
+  logger = conflogger.configure(logger);
 
-  let bucketConfig
+  let bucketConfig;
 
   if (typeof bucket === 'object') {
-    bucketConfig = bucket
-    bucket = bucketConfig.Bucket
+    bucketConfig = bucket;
+    bucket = bucketConfig.Bucket;
   } else {
-    bucketConfig = { Bucket: bucket }
+    bucketConfig = { Bucket: bucket };
   }
 
 
@@ -109,9 +83,7 @@ module.exports = function (pluginConfig) {
         const contentType = mime.getType(bundle.contentType);
 	   let chunks = await readBundle(reader, bundle);
 	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
-        //const file = await readBundle(reader, bundle.name, readTimeout)
 	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key });
-        //const url = await uploadFile({ bucket, file, contentType, calculateKey })
         bundle.url = url
         if (callback) return callback()
       } catch (err) {
@@ -129,7 +101,6 @@ module.exports = function (pluginConfig) {
         const contentType = mime.getType(path)
 	   let chunks = await readResource(reader);
 	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
-        //const file = await readResource(reader, path, readTimeout)
         const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key });
         if (callback) return callback(null, { url })
         return { url }
