@@ -1,31 +1,50 @@
 const generateGCSUrl = require('./generateGCSUrl');
-const Storage = require('@google-cloud/storage');
-const storage = new Storage();
+
 
 module.exports = function gcsWriteFile (params) {
-	const { Bucket, Key, contentType, reader, staticUrl, bucketDir } = params;
+	const { Bucket, Key, contentType, reader, staticUrl, bucketDir, type, storage } = params;
 
 	return new Promise((resolve, reject) => {
 
-		let locBucketDir = ''
+		let locBucketDir = '';
 		if(bucketDir){
 			locBucketDir = bucketDir + '/'
 		}
 
-		let locResult = reader.readBundle().pipe(
-			storage
-			.bucket(Bucket)
-			.file(locBucketDir + Key)
-			.createWriteStream({
-				gzip: true,
-				metadata: {
-					contentType: contentType
-				}
-			})
-		).on('error', (err) => {
-			reject(err);
-		}).on('finish', () => {
-			resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir));
-		});
+		if(type == 'bundle'){
+			let locResult = reader.readBundle().pipe(
+				storage
+				.bucket(Bucket)
+				.file(locBucketDir + Key)
+				.createWriteStream({
+					gzip: true,
+					metadata: {
+						contentType: contentType
+					}
+				})
+			).on('error', (err) => {
+				console.log('error trying to write bundle', err);
+				reject(err);
+			}).on('finish', () => {
+				resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir));
+			});
+		}else{
+			let locResult = reader.readResource().pipe(
+				storage
+				.bucket(Bucket)
+				.file(locBucketDir + Key)
+				.createWriteStream({
+					gzip: true,
+					metadata: {
+						contentType: contentType
+					}
+				})
+			).on('error', (err) => {
+				console.log('error trying to write resource', err);
+				reject(err);
+			}).on('finish', () => {
+				resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir));
+			});
+		}
 	})
 }
