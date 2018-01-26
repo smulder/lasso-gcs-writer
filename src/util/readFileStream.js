@@ -7,7 +7,7 @@ module.exports = function readFileStream ({ readStream, path, timeout }) {
     timeout = timeout || DEFAULT_READ_TIMEOUT
 
     const readTimer = setTimeout(() => {
-      reject(new Error(`Reading resource at path "${path}" to be uploaded to AWS s3 timed out after ${timeout}ms.`))
+      reject(new Error(`Reading resource at path "${path}" to be uploaded to GCS Bucket timed out after ${timeout}ms.`))
     }, timeout)
 
     readStream.on('data', (part) => fileParts.push(part))

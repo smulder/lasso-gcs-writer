@@ -1,22 +1,22 @@
-const mime = require('mime')
-const conflogger = require('conflogger')
-const readResource = require('./util/readResource')
+const mime = require('mime');
+const conflogger = require('conflogger');
+const readResource = require('./util/readResource');
 const readBundle = require('./util/readBundle')
-const calculateChecksum = require('./util/calculateChecksum')
-//const getS3UrlIfExists = require('./util/getS3UrlIfExists')
-const gcsWriteFile = require('./util/gcsWriteFile')
-const createBucketIfNotExist = require('./util/createBucketIfNotExist')
+const calculateChecksum = require('./util/calculateChecksum');
+const getGCSUrlIfExists = require('./util/getGCSUrlIfExists')
+const gcsWriteFile = require('./util/gcsWriteFile');
+const createBucketIfNotExist = require('./util/createBucketIfNotExist');
+const Storage = require('@google-cloud/storage');
+const storage = new Storage();
 
 
-async function uploadFile ({ staticUrl, bucket, reader, contentType, bucketDir, key }) {
+async function uploadFile ({ staticUrl, bucket, reader, contentType, bucketDir, key, type }) {
 
-  const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, bucketDir: bucketDir };
+  const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, bucketDir: bucketDir, type: type, storage: storage };
 
   // Check whether the file already exists in S3
-  //let url = await getS3UrlIfExists(s3, params)
+  let url = await getGCSUrlIfExists(params);
   // TODO write GCS check if url exists method
-
-  let url;
 
   if (!url) {
     try{
@@ -42,6 +42,7 @@ async function uploadFile ({ staticUrl, bucket, reader, contentType, bucketDir, 
 *  pluginConfig.readTimeout {Number} (optional) - The maximum amount of time to wait for a file to be read. Defaults to 30 seconds.
 *  pluginConfig.logger {Object} (optional) - Logger to write logs to. Does not log if not specified.
 */
+
 module.exports = function (pluginConfig) {
   let {
     projectID,
@@ -52,7 +53,7 @@ module.exports = function (pluginConfig) {
     calculateKey,
     readTimeout,
     logger
-} = pluginConfig || {};
+} = pluginConfig || {}
 
   if (!bucket) throw new Error('"bucket" is a required property of "lasso-gcs-writer"')
 
@@ -80,10 +81,20 @@ module.exports = function (pluginConfig) {
     async writeBundle (reader, lassoContext, callback) {
       try {
         const bundle = lassoContext.bundle;
+	   //console.log('bundle', bundle);
         const contentType = mime.getType(bundle.contentType);
 	   let chunks = await readBundle(reader, bundle);
-	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
-	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key });
+
+	   let pathParts = bundle.name.split('/');
+	   let endFolder = pathParts[pathParts.length-2];
+	   if(!endFolder){
+		   endFolder = '';
+	   }else{
+		   endFolder += '-';
+	   }
+	   let ext = contentType.split('/').pop() == "css" ? "css" : "js";
+	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '-' + endFolder + pathParts.pop() + '.' + ext;
+	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key, type:'bundle' });
         bundle.url = url
         if (callback) return callback()
       } catch (err) {
@@ -97,11 +108,12 @@ module.exports = function (pluginConfig) {
      */
     async writeResource (reader, lassoContext, callback) {
       try {
+	   //console.log('lassoContext', lassoContext);
         const path = lassoContext.path
         const contentType = mime.getType(path)
 	   let chunks = await readResource(reader);
-	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks);
-        const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key });
+	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '-' + path.split('/').pop();
+        const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key, type:'resource' });
         if (callback) return callback(null, { url })
         return { url }
       } catch (err) {
