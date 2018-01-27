@@ -93,7 +93,7 @@ module.exports = function (pluginConfig) {
 		   endFolder += '-';
 	   }
 	   let ext = contentType.split('/').pop() == "css" ? "css" : "js";
-	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '-' + endFolder + '.' + ext;
+	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '.' + ext;
 	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, bucketDir, key, type:'bundle' });
         bundle.url = url
         if (callback) return callback()
