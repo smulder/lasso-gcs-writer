@@ -19,7 +19,8 @@ module.exports = function gcsWriteFile (params) {
 				.createWriteStream({
 					gzip: true,
 					metadata: {
-						contentType: contentType
+						contentType: contentType,
+						cacheControl: 'public, max-age=2592000'
 					}
 				})
 			).on('error', (err) => {
@@ -36,7 +37,8 @@ module.exports = function gcsWriteFile (params) {
 				.createWriteStream({
 					gzip: true,
 					metadata: {
-						contentType: contentType
+						contentType: contentType,
+						cacheControl: 'public, max-age=2592000'
 					}
 				})
 			).on('error', (err) => {
