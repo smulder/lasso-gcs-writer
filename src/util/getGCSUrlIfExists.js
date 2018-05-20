@@ -2,7 +2,7 @@ const generateGCSUrl = require('./generateGCSUrl')
 
 module.exports = async function getGCSUrlIfExists(params) {
 	return new Promise((resolve, reject) => {
-		const { Bucket, Key, contentType, reader, staticUrl, staticUrlArray, step, bucketDir, type, storage } = params;
+		const { Bucket, Key, keyCache, contentType, reader, staticUrl, staticUrlArray, step, bucketDir, type, storage } = params;
 
 		let locBucketDir = ''
 		if(bucketDir){

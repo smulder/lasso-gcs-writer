@@ -10,7 +10,7 @@ const Storage = require('@google-cloud/storage');
 const storage = new Storage();
 
 
-async function uploadFile ({ staticUrl, staticUrlArray, step, bucket, reader, contentType, bucketDir, key, type }) {
+async function uploadFile ({ staticUrl, staticUrlArray, step, bucket, reader, contentType, bucketDir, key, keyCache, type }) {
 
   const params = { Bucket: bucket, Key: key, keyCache, keyCache, reader: reader, contentType: contentType, staticUrl: staticUrl, staticUrlArray: staticUrlArray, step: step, bucketDir: bucketDir, type: type, storage: storage };
 
@@ -99,7 +99,7 @@ module.exports = function (pluginConfig) {
 	   let ext = contentType.split('/').pop() == "css" ? "css" : "js";
 	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '.' + ext;
 
-	   if(staticUrlArray && staticUrlArray.length && step < staticUrlArray.length && !keyCache[key]){
+	   if(staticUrlArray && staticUrlArray.length && step < staticUrlArray.length-1 && !keyCache[key]){
 		   step++;
 	   }else if(!keyCache[key]){
 		   step = 0;
@@ -124,6 +124,11 @@ module.exports = function (pluginConfig) {
         const contentType = mime.getType(path)
 	   let chunks = await readResource(reader);
 	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '-' + path.split('/').pop();
+	   if(staticUrlArray && staticUrlArray.length && step < staticUrlArray.length-1 && !keyCache[key]){
+		   step++;
+	   }else if(!keyCache[key]){
+		   step = 0;
+	   }
         const url = await uploadFile({ bucket, reader, contentType, staticUrl, staticUrlArray, step, bucketDir, key, keyCache, type:'resource' });
         if (callback) return callback(null, { url })
         return { url }
