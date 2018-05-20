@@ -2,7 +2,7 @@ const generateGCSUrl = require('./generateGCSUrl')
 
 module.exports = async function getGCSUrlIfExists(params) {
 	return new Promise((resolve, reject) => {
-		const { Bucket, Key, contentType, reader, staticUrl, bucketDir, type, storage } = params;
+		const { Bucket, Key, contentType, reader, staticUrl, staticUrlArray, step, bucketDir, type, storage } = params;
 
 		let locBucketDir = ''
 		if(bucketDir){
@@ -16,7 +16,7 @@ module.exports = async function getGCSUrlIfExists(params) {
 		.then((result) => {
 
 			if(result && result[0]){
-				resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir));
+				resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir, staticUrlArray, step));
 			}else{
 				//console.log('file: ' + staticUrl + '/' + locBucketDir + '/' + Key + ' ----- did not exist');
 				resolve(null);
