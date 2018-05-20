@@ -16,7 +16,7 @@ module.exports = async function getGCSUrlIfExists(params) {
 		.then((result) => {
 
 			if(result && result[0]){
-				resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir, staticUrlArray, step));
+				resolve(generateGCSUrl(Bucket, Key, staticUrl, locBucketDir, staticUrlArray, step, keyCache));
 			}else{
 				//console.log('file: ' + staticUrl + '/' + locBucketDir + '/' + Key + ' ----- did not exist');
 				resolve(null);

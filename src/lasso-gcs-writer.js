@@ -12,7 +12,7 @@ const storage = new Storage();
 
 async function uploadFile ({ staticUrl, staticUrlArray, step, bucket, reader, contentType, bucketDir, key, type }) {
 
-  const params = { Bucket: bucket, Key: key, reader: reader, contentType: contentType, staticUrl: staticUrl, staticUrlArray: staticUrlArray, step:step, bucketDir: bucketDir, type: type, storage: storage };
+  const params = { Bucket: bucket, Key: key, keyCache, keyCache, reader: reader, contentType: contentType, staticUrl: staticUrl, staticUrlArray: staticUrlArray, step: step, bucketDir: bucketDir, type: type, storage: storage };
 
   // Check whether the file already exists in Google Cloud Storage
   let url = await getGCSUrlIfExists(params);
@@ -55,7 +55,9 @@ module.exports = function (pluginConfig) {
     logger
   } = pluginConfig || {}
 
-  let step = 0;
+  var step = 0;
+  // key : staticUrl
+  var keyCache = {};
 
   if (!bucket) throw new Error('"bucket" is a required property of "lasso-gcs-writer"')
 
@@ -81,11 +83,7 @@ module.exports = function (pluginConfig) {
      */
     async writeBundle (reader, lassoContext, callback) {
       try {
-	   if(staticUrlArray && staticUrlArray.length && step < staticUrlArray.length){
-		   step++;
-	   }else{
-		   step = 0;
-	   }
+
         const bundle = lassoContext.bundle;
 	   //console.log('bundle', bundle);
         const contentType = mime.getType(bundle.contentType);
@@ -100,7 +98,14 @@ module.exports = function (pluginConfig) {
 	   }
 	   let ext = contentType.split('/').pop() == "css" ? "css" : "js";
 	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '.' + ext;
-	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, staticUrlArray, step, bucketDir, key, type:'bundle' });
+
+	   if(staticUrlArray && staticUrlArray.length && step < staticUrlArray.length && !keyCache[key]){
+		   step++;
+	   }else if(!keyCache[key]){
+		   step = 0;
+	   }
+
+	   const url = await uploadFile({ bucket, reader, contentType, staticUrl, staticUrlArray, step, bucketDir, key, keyCache, type:'bundle' });
         bundle.url = url
         if (callback) return callback()
       } catch (err) {
@@ -119,7 +124,7 @@ module.exports = function (pluginConfig) {
         const contentType = mime.getType(path)
 	   let chunks = await readResource(reader);
 	   let key = (calculateKey && calculateKey(chunks)) || calculateChecksum(chunks) + '-' + path.split('/').pop();
-        const url = await uploadFile({ bucket, reader, contentType, staticUrl, staticUrlArray, bucketDir, key, type:'resource' });
+        const url = await uploadFile({ bucket, reader, contentType, staticUrl, staticUrlArray, step, bucketDir, key, keyCache, type:'resource' });
         if (callback) return callback(null, { url })
         return { url }
       } catch (err) {
