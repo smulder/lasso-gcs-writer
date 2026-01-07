@@ -20,7 +20,7 @@ module.exports = function gcsWriteFile (params) {
 					gzip: true,
 					metadata: {
 						contentType: contentType,
-						cacheControl: 'public, max-age=2592000'
+						cacheControl: 'public, max-age=31536000'
 					}
 				})
 			).on('error', (err) => {
@@ -38,7 +38,7 @@ module.exports = function gcsWriteFile (params) {
 					gzip: true,
 					metadata: {
 						contentType: contentType,
-						cacheControl: 'public, max-age=2592000'
+						cacheControl: 'public, max-age=31536000'
 					}
 				})
 			).on('error', (err) => {
